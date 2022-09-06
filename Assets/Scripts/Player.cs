@@ -20,8 +20,14 @@ public class Player : MonoBehaviour
     [SerializeField] private float moveForce = 1000;
     [SerializeField] private GameObject bulletPrefab;
     private bool _isTouchGround;
+    private bool _isJumping;
 
     [SerializeField] private LayerMask mask;
+
+    [SerializeField] private float hp = 100;
+    [SerializeField] private float maxHp = 100;
+
+    public float speedControl;
 
     void Start()
     {
@@ -30,7 +36,7 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.LeftArrow))
+        if (Input.GetKey(KeyCode.LeftArrow) || speedControl <= -4)
         {
             if (Input.GetKey(KeyCode.LeftShift))
             {
@@ -41,7 +47,7 @@ public class Player : MonoBehaviour
                 WalkLeft();
             }
         }
-        else if (Input.GetKey(KeyCode.RightArrow))
+        else if (Input.GetKey(KeyCode.RightArrow) || speedControl >= 4)
         {
             if (Input.GetKey(KeyCode.LeftShift))
             {
@@ -82,13 +88,13 @@ public class Player : MonoBehaviour
         CheckHit();
     }
 
-    void WalkLeft()
+    public void WalkLeft()
     {
         spriteRenderer.flipX = true;
         ChangeSpeed(-4);
     }
 
-    void WalkRight()
+    public void WalkRight()
     {
         spriteRenderer.flipX = false;
         ChangeSpeed(4);
@@ -106,7 +112,7 @@ public class Player : MonoBehaviour
         ChangeSpeed(10);
     }
 
-    void ChangeSpeed(float speed)
+    public void ChangeSpeed(float speed)
     {
         this.speed = speed;
         Vector2 velocity = rigidbody2D.velocity;
@@ -117,7 +123,9 @@ public class Player : MonoBehaviour
 
     void Jump()
     {
-        if (!_isTouchGround) return;
+        if (!_isTouchGround && rigidbody2D.velocity.y > 0) return;
+        if (_isJumping) return;
+        _isJumping = true;
         // rigidbody2D.AddForce(Vector2.up * (jumpForce * Time.deltaTime), ForceMode2D.Impulse);
         Vector2 velocity = rigidbody2D.velocity;
         velocity.y = jumpForce * Time.deltaTime;
@@ -125,7 +133,7 @@ public class Player : MonoBehaviour
         anim.SetBool(ANIM_BLOCK, true);
     }
 
-    void Attack()
+    public void Attack()
     {
         // anim.SetBool(ANIM_ATTACK, true);
         GameObject bulletObj = Instantiate(bulletPrefab, bulletStartPosition.position, Quaternion.identity);
@@ -135,15 +143,11 @@ public class Player : MonoBehaviour
         bullet.spriteRenderer.flipX = spriteRenderer.flipX;
     }
 
-    // void StopAttack()
-    // {
-    //     anim.SetBool(ANIM_ATTACK, false);
-    // }
-
     private void OnTriggerEnter2D(Collider2D other)
     {
         anim.SetBool(ANIM_BLOCK, false);
         _isTouchGround = true;
+        if (_isJumping) _isJumping = false;
     }
 
     private void OnTriggerExit2D(Collider2D other)
@@ -153,11 +157,18 @@ public class Player : MonoBehaviour
 
     void CheckHit()
     {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.up, mask);
-        
-        if (hit.collider != null)
-        {
-            Debug.Log(hit.collider.name);
-        }
+        // RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.up, mask);
+        //
+        // if (hit.collider != null)
+        // {
+        //     Debug.Log(hit.collider.name);
+        // }
+    }
+
+    public void Damage(float damage)
+    {
+        hp -= damage;
+        float amount = Mathf.Max(hp / maxHp, 0);
+        HudController.Instance.SetHp(amount);
     }
 }

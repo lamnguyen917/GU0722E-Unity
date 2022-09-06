@@ -8,6 +8,7 @@ public class Bullet : MonoBehaviour
     [SerializeField] private Rigidbody2D rigidbody2D;
     public float speed = 10;
     public SpriteRenderer spriteRenderer;
+    [SerializeField] protected float damage = 10;
 
     private void FixedUpdate()
     {
@@ -16,9 +17,5 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.layer == LayerMask.NameToLayer("Wall"))
-        {
-            Destroy(gameObject);
-        }
     }
 }
