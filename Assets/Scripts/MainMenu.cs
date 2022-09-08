@@ -11,5 +11,12 @@ public class MainMenu : MonoBehaviour
     {
         pauseMenu.SetActive(true);
         hudMenu.SetActive(false);
+        pauseMenu.GetComponent<PauseMenu>().Open();
+    }
+
+    public void Resume()
+    {
+        hudMenu.SetActive(true);
+        pauseMenu.GetComponent<PauseMenu>().Close();
     }
 }

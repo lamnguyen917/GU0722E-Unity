@@ -10,7 +10,6 @@ public class Player : MonoBehaviour
     private const string ANIM_JUMP = "isJump";
     private const string ANIM_ATTACK = "isAttack";
 
-    [SerializeField] private Transform directionArrow;
     [SerializeField] private Transform bulletStartPosition;
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private Animator anim;
@@ -36,7 +35,8 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.LeftArrow) || speedControl <= -4)
+
+        if (Input.GetAxis("Horizontal") < 0)
         {
             if (Input.GetKey(KeyCode.LeftShift))
             {
@@ -47,7 +47,7 @@ public class Player : MonoBehaviour
                 WalkLeft();
             }
         }
-        else if (Input.GetKey(KeyCode.RightArrow) || speedControl >= 4)
+        else if (Input.GetAxis("Horizontal") > 0)
         {
             if (Input.GetKey(KeyCode.LeftShift))
             {
@@ -58,32 +58,53 @@ public class Player : MonoBehaviour
                 WalkRight();
             }
         }
-        else
-        {
-            ChangeSpeed(0);
-        }
 
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Jump();
-        }
-
-        if (Input.GetKeyDown(KeyCode.A))
+        if (Input.GetAxis("Fire1") > 0)
         {
             Attack();
         }
+        
+        // if (Input.GetKey(KeyCode.LeftArrow) || speedControl <= -4)
+        // {
+        //     if (Input.GetKey(KeyCode.LeftShift))
+        //     {
+        //         RunLeft();
+        //     }
+        //     else
+        //     {
+        //         WalkLeft();
+        //     }
+        // }
+        // else if (Input.GetKey(KeyCode.RightArrow) || speedControl >= 4)
+        // {
+        //     if (Input.GetKey(KeyCode.LeftShift))
+        //     {
+        //         RunRight();
+        //     }
+        //     else
+        //     {
+        //         WalkRight();
+        //     }
+        // }
+        // else
+        // {
+        //     ChangeSpeed(0);
+        // }
+        //
+        // if (Input.GetKeyDown(KeyCode.Space))
+        // {
+        //     Jump();
+        // }
+        //
+        // if (Input.GetKeyDown(KeyCode.A))
+        // {
+        //     Attack();
+        // }
 
         // if (Input.GetKeyUp(KeyCode.A))
         // {
         //     StopAttack();
         // }
-
-        if (rigidbody2D.velocity.magnitude > 0.1f)
-        {
-            Vector3 rotation = Vector3.zero;
-            rotation.z = -Vector2.Angle(rigidbody2D.velocity, Vector2.up) * Mathf.Sign(speed);
-            directionArrow.eulerAngles = rotation;
-        }
 
         CheckHit();
     }
