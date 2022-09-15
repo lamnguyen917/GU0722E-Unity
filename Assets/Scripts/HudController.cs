@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using TMPro;
 using UnityEngine;
@@ -16,22 +17,29 @@ public class HudController : MonoBehaviour
         Instance = this;
     }
 
+    private void Start()
+    {
+        inputText.SetText(PlayerPrefs.GetString("coin_trigger", "NONE"));
+    }
+
     public void SetHp(float amount)
     {
         hpIndicator.fillAmount = amount;
     }
 
+    public void SetCoin(int amount)
+    {
+    }
+
     private void Update()
     {
-        string s = "";
+        axis.SetText($"Coins: {GameManager.Instance.coins}");
+        
+        inputText.SetText(GameManager.Instance.GetEmployeeString());
+    }
 
-        if (Input.GetKey(KeyCode.LeftArrow)) s += "← ";
-        if (Input.GetKey(KeyCode.RightArrow)) s += "→ ";
-        if (Input.GetKey(KeyCode.A)) s += "A ";
-        if (Input.GetKey(KeyCode.D)) s += "D";
-        if (Input.GetMouseButton(0)) s += "M0";
-        inputText.text = s;
-
-        axis.text = $"{Input.GetAxis("Mouse X")}; {Input.GetAxis("Mouse Y")}";
+    public void LoadJson(string content)
+    {
+        inputText.SetText(content);
     }
 }

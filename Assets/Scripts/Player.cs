@@ -15,9 +15,11 @@ public class Player : MonoBehaviour
     [SerializeField] private Animator anim;
     [SerializeField] private float speed;
     [SerializeField] private Rigidbody2D rigidbody2D;
-    [SerializeField] private float jumpForce = 1000;
+    [SerializeField] private Vector2 jumpForce;
     [SerializeField] private float moveForce = 1000;
     [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private int maxJump = 1;
+
     private bool _isTouchGround;
     private bool _isJumping;
 
@@ -28,14 +30,18 @@ public class Player : MonoBehaviour
 
     public float speedControl;
 
+    [SerializeField] private AudioClip runSfx;
+    [SerializeField] private AudioClip jumpSfx;
+    [SerializeField] private AudioSource source;
+
+
     void Start()
     {
     }
 
-    // Update is called once per frame
     void Update()
     {
-
+        PlayRunningSfx();
         if (Input.GetAxis("Horizontal") < 0)
         {
             if (Input.GetKey(KeyCode.LeftShift))
@@ -63,50 +69,31 @@ public class Player : MonoBehaviour
         {
             Attack();
         }
-        
-        // if (Input.GetKey(KeyCode.LeftArrow) || speedControl <= -4)
-        // {
-        //     if (Input.GetKey(KeyCode.LeftShift))
-        //     {
-        //         RunLeft();
-        //     }
-        //     else
-        //     {
-        //         WalkLeft();
-        //     }
-        // }
-        // else if (Input.GetKey(KeyCode.RightArrow) || speedControl >= 4)
-        // {
-        //     if (Input.GetKey(KeyCode.LeftShift))
-        //     {
-        //         RunRight();
-        //     }
-        //     else
-        //     {
-        //         WalkRight();
-        //     }
-        // }
-        // else
-        // {
-        //     ChangeSpeed(0);
-        // }
-        //
-        // if (Input.GetKeyDown(KeyCode.Space))
-        // {
-        //     Jump();
-        // }
-        //
-        // if (Input.GetKeyDown(KeyCode.A))
-        // {
-        //     Attack();
-        // }
 
-        // if (Input.GetKeyUp(KeyCode.A))
-        // {
-        //     StopAttack();
-        // }
+        if (Input.GetAxis("Jump") > 0 && _isTouchGround)
+        {
+            Jump();
+            source.clip = jumpSfx;
+            source.loop = false;
+            source.Play();
+        }
 
         CheckHit();
+    }
+
+    void PlayRunningSfx()
+    {
+        if (_isJumping) return;
+        if (Input.GetAxis("Horizontal") == 0)
+        {
+            source.Stop();
+            return;
+        }
+
+        // if (source.clip == runSfx && !source.isPlaying) return;
+        source.clip = runSfx;
+        source.loop = true;
+        source.Play();
     }
 
     public void WalkLeft()
@@ -144,13 +131,9 @@ public class Player : MonoBehaviour
 
     void Jump()
     {
-        if (!_isTouchGround && rigidbody2D.velocity.y > 0) return;
-        if (_isJumping) return;
         _isJumping = true;
-        // rigidbody2D.AddForce(Vector2.up * (jumpForce * Time.deltaTime), ForceMode2D.Impulse);
-        Vector2 velocity = rigidbody2D.velocity;
-        velocity.y = jumpForce * Time.deltaTime;
-        rigidbody2D.velocity = velocity;
+        _isTouchGround = false;
+        rigidbody2D.AddForce(jumpForce, ForceMode2D.Impulse);
         anim.SetBool(ANIM_BLOCK, true);
     }
 
@@ -162,18 +145,6 @@ public class Player : MonoBehaviour
         float direction = spriteRenderer.flipX ? -1 : 1;
         bullet.speed = Mathf.Abs(bullet.speed) * direction;
         bullet.spriteRenderer.flipX = spriteRenderer.flipX;
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        anim.SetBool(ANIM_BLOCK, false);
-        _isTouchGround = true;
-        if (_isJumping) _isJumping = false;
-    }
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        _isTouchGround = false;
     }
 
     void CheckHit()
@@ -191,5 +162,13 @@ public class Player : MonoBehaviour
         hp -= damage;
         float amount = Mathf.Max(hp / maxHp, 0);
         HudController.Instance.SetHp(amount);
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            _isTouchGround = true;
+        }
     }
 }

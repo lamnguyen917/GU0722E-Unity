@@ -102,6 +102,7 @@ MonoBehaviour:
   rigidbody2D: {fileID: 1792889271746757564}
   speed: 2.5
   spriteRenderer: {fileID: 1792889271746757562}
+  damage: 10
 --- !u!50 &1792889271746757564
 Rigidbody2D:
   serializedVersion: 4
